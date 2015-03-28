@@ -14,9 +14,6 @@ import csv
 
 
 
-
-
-
 def get_image(imgFile):
     """Getting Image Capture from the user, and saves image as image.jpg"""
     cap = cv2.VideoCapture(0)
