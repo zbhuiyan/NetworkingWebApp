@@ -1,5 +1,8 @@
 #Shrinidhi Thirumalai and Zarin Bhuiyan
-#Gets picture from user input, then outputs a csv file of the text on image
+#Codestellation Hackathon 2015
+
+#Business Card Reader
+#Gets picture from user input, then outputs a csv file of the processed text on image
 
 #Imports:
 import numpy as np
@@ -30,10 +33,13 @@ def get_image(imgFile):
 def filter_image(imgFile):
     """Reads image.jpg and re-writes a clear filtered image.jpg"""
     img = cv2.imread('image.jpg',0)
+    #blurring
     img = cv2.medianBlur(img, 3)
-    res, thresh_img = cv2.threshold(img, 127, 255, cv2.THRESH_OTSU)
-    if res:
+    #thresholding
+    valid, thresh_img = cv2.threshold(img, 127, 255, cv2.THRESH_OTSU)
+    if valid:
         img = thresh_img
+    #writing to file
     cv2.imwrite('image.jpg', img)
 
 
@@ -49,9 +55,11 @@ def write_text(text, outFile):
         output.writerow([text])
 
 def main():
+    """Main sequence for gathering image, and outputting text to file"""
     #file names
     imgFile = 'image.jpg'
     outFile = 'output.csv'
+
     #main sequence
     get_image(imgFile)
     filter_image(imgFile)
