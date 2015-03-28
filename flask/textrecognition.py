@@ -87,19 +87,6 @@ def csv_write(imgFile):
 
 
 
-
-
-#     example=csv.writer(open('test.csv', 'wb'), delimiter=' ')
-# example.writerows( [[1, 2], [2, 3], [4, 5]])
-
-#     out = open('out.csv', 'w')
-# for row in l:
-#     for column in row:
-#         out.write('%d;' % column)
-#     out.write('\n')
-# out.close() 
-
-
 def main():
     """Main sequence for gathering image, and outputting text to file"""
     #file names
