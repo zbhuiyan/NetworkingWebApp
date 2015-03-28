@@ -12,6 +12,10 @@ import pytesseract
 import csv
 
 
+
+
+
+
 def get_image(imgFile):
     """Getting Image Capture from the user, and saves image as image.jpg"""
     cap = cv2.VideoCapture(0)
@@ -30,6 +34,8 @@ def get_image(imgFile):
     cap.release()
     cv2.destroyAllWindows()
 
+
+
 def filter_image(imgFile):
     """Reads image.jpg and re-writes a clear filtered image.jpg"""
     img = cv2.imread('image.jpg',0)
@@ -41,6 +47,23 @@ def filter_image(imgFile):
         img = thresh_img
     #writing to file
     cv2.imwrite('image.jpg', img)
+
+def subimage(imgFile):  
+
+    centre = (110,125)
+    theta = np.pi/6.0
+    width = 100
+    height = 200
+
+    # patch = subimage(imgFile, (110, 125), np.pi / 6.0, 100, 200)
+    # cv.SaveImage('image.jpg', patch)
+
+    imgFile = cv.CreateImage((width, height), image.depth, image.nChannels)
+    mapping = np.array([[np.cos(theta), -np.sin(theta), centre[0]],
+                        [np.sin(theta), np.cos(theta), centre[1]]])
+    map_matrix_cv = cv.fromarray(mapping)
+    cv.GetQuadrangleSubPix(image, img, map_matrix_cv
+    return imgFile
 
 
 def extract_text(imgFile):
@@ -61,10 +84,13 @@ def main():
     outFile = 'output.csv'
 
     #main sequence
+
     get_image(imgFile)
+    subimage(imgFile)
     filter_image(imgFile)
     extractedText = extract_text(imgFile)
     write_text(extractedText, outFile)
+    
 
 if __name__ == "__main__":
     main()
