@@ -14,9 +14,6 @@ import csv
 
 
 
-
-
-
 def get_image(imgFile):
     """Getting Image Capture from the user, and saves image as image.jpg"""
     cap = cv2.VideoCapture(0)
@@ -112,7 +109,7 @@ def main():
     #main sequence
 
     get_image(imgFile)
-    subimage(imgFile, np.pi/ 6.0)
+    # subimage(imgFile, np.pi/ 6.0)
     filter_image(imgFile)
     extractedText = extract_text(imgFile)
     write_text(extractedText, outFile)
