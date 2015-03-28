@@ -11,10 +11,17 @@ from cv2 import cv
 from PIL import Image
 import pytesseract
 import csv
+from cropping import *
 
+def fail (msg, img):
+    """Graceful Fail with error message"""
+    blank = np.zeros((img.shape[0], img.shape[1], 3), np.uint8)
+    blank = display_text(blank, msg + '\n Press any key to restart.')
+    show_image_till_key(blank, 0)
+    cv2.destroyAllWindows()
+    main()
 
-
-def get_image(imgFile):
+def get_image(imgFile, outFile):
     """Getting Image Capture from the user, and saves image as image.jpg"""
     cap = cv2.VideoCapture(0)
     running = True
@@ -26,15 +33,13 @@ def get_image(imgFile):
         if cv2.waitKey(1) & 0xFF == ord('q'):
             s, img = cap.read()
             if s:
-                cv2.imwrite('image.jpg', img)
+                cv2.imwrite(outFile, img)
                 running = False #close video
     #When everything done, release the capture
     cap.release()
     cv2.destroyAllWindows()
 
-
-
-def filter_image(imgFile):
+def filter_image(imgFile, outFile):
     """Reads image.jpg and re-writes a clear filtered image.jpg"""
     img = cv2.imread('image.jpg',0)
     #blurring
@@ -44,7 +49,7 @@ def filter_image(imgFile):
     if valid:
         img = thresh_img
     #writing to file
-    cv2.imwrite('image.jpg', img)
+    cv2.imwrite(outFile, img)
 
 def subimage(imgFile, angle):  
     # img = cv2.imread(imgFile,0)
@@ -80,12 +85,10 @@ def write_text(text, outFile):
         output.writerow([text])
 
 
-def csv_write(imgFile):
+def csv_write(imgFile, outFile):
     imgFile_list = []
-    writing = csv.writer(open('output.csv', 'wb'), delimiter= ',')
+    writing = csv.writer(open(outFile, 'wb'), delimiter= ',')
     writing.writerows(imgFile_list)
-
-
 
 
 
@@ -104,14 +107,16 @@ def main():
     """Main sequence for gathering image, and outputting text to file"""
     #file names
     imgFile = 'image.jpg'
+    cropFile = 'cropped.jpg'
+    filtFile = 'filtered.jpg'
     outFile = 'output.csv'
 
     #main sequence
-
-    get_image(imgFile)
+    get_image(imgFile, imgFile)
+    get_input_and_crop(imgFile, cropFile)
     # subimage(imgFile, np.pi/ 6.0)
-    filter_image(imgFile)
-    extractedText = extract_text(imgFile)
+    filter_image(cropFile, filtFile)
+    extractedText = extract_text(filtFile)
     write_text(extractedText, outFile)
     
 
