@@ -1,5 +1,5 @@
 #Shrinidhi Thirumalai and Zarin Bhuiyan
-#Gets picture from user input, then outputs a csv file of text on image
+#Gets picture from user input, then outputs a csv file of the text on image
 
 #Imports:
 import numpy as np
@@ -9,8 +9,8 @@ import pytesseract
 import csv
 
 
-def get_image():
-    """Getting Image Capture from the user, and saving it as image.jpg"""
+def get_image(imgFile):
+    """Getting Image Capture from the user, and saves image as image.jpg"""
     cap = cv2.VideoCapture(0)
     running = True
     while running:
@@ -21,24 +21,42 @@ def get_image():
         if cv2.waitKey(1) & 0xFF == ord('q'):
             s, img = cap.read()
             if s:
-                cv2.imwrite('image.jpg', img)#save image
-            running = False #close video
+                cv2.imwrite('image.jpg', img)
+                running = False #close video
     #When everything done, release the capture
     cap.release()
     cv2.destroyAllWindows()
 
-def extract_text(img):
-    """Takes an image location as an input, then filters and returns text in it"""
-    extractedtext = pytesseract.image_to_string(Image.open(img))
+def filter_image(imgFile):
+    """Reads image.jpg and re-writes a clear filtered image.jpg"""
+    img = cv2.imread('image.jpg',0)
+    img = cv2.medianBlur(img, 3)
+    res, thresh_img = cv2.threshold(img, 127, 255, cv2.THRESH_OTSU)
+    if res:
+        img = thresh_img
+    cv2.imwrite('image.jpg', img)
+
+
+def extract_text(imgFile):
+    """Takes an image location as an input, then filters and returns the text in it as a string"""
+    extractedtext = pytesseract.image_to_string(Image.open(imgFile))
     return extractedtext
 
-def write_text(text):
+def write_text(text, outFile):
     """Takes text as input, and writes it to a CSV"""
-    with open('output.csv', 'wb') as csvfile:
+    with open(outFile, 'wb') as csvfile:
         output = csv.writer(csvfile, delimiter= ' ', quotechar = '|', quoting = csv.QUOTE_MINIMAL)
         output.writerow([text])
 
+def main():
+    #file names
+    imgFile = 'image.jpg'
+    outFile = 'output.csv'
+    #main sequence
+    get_image(imgFile)
+    filter_image(imgFile)
+    extractedText = extract_text(imgFile)
+    write_text(extractedText, outFile)
+
 if __name__ == "__main__":
-    get_image()
-    extractedtext = extract_text('image.jpg')
-    write_text(extractedtext)
+    main()
