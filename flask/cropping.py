@@ -11,18 +11,16 @@ from PIL import Image
 import pytesseract
 import csv
 
-def fail (msg, img):
-    """Graceful Fail with error message"""
-    blank = np.zeros((img.shape[0], img.shape[1], 3), np.uint8)
-    blank = display_text(blank, msg + '. Press any key to restart.')
-    show_image_till_key(blank, 0)
-    cv2.destroyAllWindows()
-    get_input_and_crop()  
-
 def display_text(img, text):
 	"""Puts given text onto given image"""
+	fontsize = 1
+	msglist = text.rstrip().split('\n')
+	print msglist
 	font = cv2.FONT_HERSHEY_SIMPLEX
-	cv2.putText(img,text,(10,500), font, 1,(255,255,255),2)
+	y = img.shape[1]/2
+	for msg in msglist:
+		cv2.putText(img,msg,(10,y), font, fontsize, (255,255,255),2)
+		y += fontsize*25
 	return img
 
 def show_image_till_key(img, userkey):
@@ -47,7 +45,7 @@ def user_response(contour, img):
 	"""Gets user input on if contour is correct"""
 	#Highlight outline:
 	cv2.drawContours(img, [contour], -1, (0, 255, 0), 3)
-	img = display_text(img, 'Is this your business card outline? Enter y for yes, n for no')
+	img = display_text(img, 'Is this your business card outline? \n Enter y for yes, n for no')
 	while(1):
 	    key = show_image_till_key(img, 33)
 	    if key ==ord('y'):
@@ -56,17 +54,30 @@ def user_response(contour, img):
 	        return False
 	cv2.destroyAllWindows()
 
-def get_user_contour(img):
-	"""main sequence for user input to find correct contour"""
-	#Finding edges of image
-	cnts = image_to_contours(img)
+def if_crop(img):
+	print "in if crop"
+	starter = img.copy()
+	starter = display_text(starter, 'Does your image need to be cropped? \n ie: Is there extra background?')
+	while True:
+		key = show_image_till_key(starter, 33)
+		if key == ord('y'):
+			return True
+		elif key == ord('n'):
+			return False
 
+def show_original_image(img):
 	#Display original image:
 	orig = img.copy()
 	orig = display_text(orig, 'Enter key to begin')
 	show_image_till_key(orig, 0)
 	cv2.destroyAllWindows()
-	 
+	print "orignal image done"
+
+def get_user_contour(img):
+	"""main sequence for user input to find correct contour"""
+	#Finding edges of image
+	cnts = image_to_contours(img)
+
 	# loop over the contours
 	for screen in cnts:
 		peri = cv2.arcLength(screen, True)
@@ -76,7 +87,7 @@ def get_user_contour(img):
 			if user_response(screen, img):
 				return screen
 		cv2.destroyAllWindows()
-	fail('Could not find card in image. Please try again', img)
+	fail('Could not find card in image. \n Please try again', img)
 
 def crop(img, contour):
 	"""Crops original file to given contour"""
@@ -85,15 +96,24 @@ def crop(img, contour):
 	crop_img = img[y:y+h, x:x+w]
 	return crop_img
 
-def get_input_and_crop():
-	"""Gets user input and crops to given contour"""
-	orig = cv2.imread('examplecard.jpg',1)
+def get_input_and_crop(imgFile, outFile):
+	"""Gets user input, crops to given contour, and saves to file"""
+	orig = cv2.imread(imgFile,1)
 	img = orig.copy()
-	contour = get_user_contour(img)
-	cropped = crop(orig, contour)
+	#Show original image:
+	# show_original_image(img)
+	toCrop = if_crop(img)
+	print 'tocrop', toCrop
+	if toCrop:
+		print "to crop"
+		contour = get_user_contour(img)
+		cropped = crop(orig, contour)
+	else:
+		print "not in to crop"
+		cropped = orig
 	show_image_till_key(cropped, 0)
-	return cropped  
+	cv2.imwrite(outFile, cropped)
 
 if __name__ == "__main__":
-	img = get_input_and_crop()
+	img = get_input_and_crop(imgFile, outFile)
 
