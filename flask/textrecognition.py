@@ -62,7 +62,7 @@ def main():
 
     #main sequence
     get_image(imgFile)
-    filter_image(imgFile)
+    # filter_image(imgFile)
     extractedText = extract_text(imgFile)
     write_text(extractedText, outFile)
 
